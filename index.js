@@ -4,7 +4,7 @@ var mongoClient = mongodb.MongoClient;
 const mlabUrl = process.env.MONGOLAB_URI;
 var app = express();
 var port = process.env.PORT || 8080;
-const applicationPath ="https://learn-something-new-chayakrishnaprasad.c9users.io/";
+const applicationPath ="https://gentle-bayou-97721.herokuapp.com/";
 
 app.get('/add/:urlParam*?',function(req,res){
     if(req.params.urlParam){
@@ -64,11 +64,7 @@ function generateRandomSalt(){
 }
 
 app.listen(port,function(){
- console.log("something is happening at https://learn-something-new-chayakrishnaprasad.c9users.io/ ");
+ console.log("something is happening at https://gentle-bayou-97721.herokuapp.com/ ");
 });
 
-
-//after deployment to heroku :
-
-// set heroku config:set MONGOLAB_URI=mongodb://chaya:admin@ds149207.mlab.com:49207/freecodecamplearn
 
