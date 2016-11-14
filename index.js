@@ -6,6 +6,30 @@ var app = express();
 var port = process.env.PORT || 8080;
 const applicationPath ="https://gentle-bayou-97721.herokuapp.com/";
 
+app.get('/all',function(req,res){
+    mongoClient.connect(mlabUrl,function(err, db) {
+        if(err) throw err;
+        var tableurl = db.collection('miniurl');
+        tableurl.find({}).toArray(function(err,resul){
+            if(err) throw(err);
+            else{
+                res.send(resul);
+            }
+        });
+    })
+});
+
+app.get('/delete',function(req,res){
+    mongoClient.connect(mlabUrl,function(err, db) {
+        if(err) throw err;
+        var tableurl = db.collection('miniurl');
+        tableurl.remove({},function(err,resu) {
+            if(err) throw err;
+            res.send(resu);
+        });
+    });
+});
+
 app.get('/add/:urlParam*?',function(req,res){
     if(req.params.urlParam){
         var givenUrl = (req.url).slice(5);
@@ -17,18 +41,18 @@ app.get('/add/:urlParam*?',function(req,res){
                      if(err) throw err;
                      else{
                          var urltable = db.collection('miniurl');
-                         urltable.find({original:givenUrl},function(err,results){
+                         urltable.find({"original":givenUrl}).toArray(function(err,fetchedResults){
                              if(err) throw err;
-                             else if(results.length){
-                                 res.send(results);
+                             else if(fetchedResults.length>0){
+                                 res.send(fetchedResults);
                              }else{
                                  var newEntry = {original:givenUrl,minified:applicationPath+generateRandomSalt()};
-                                 urltable.insert([newEntry],function(err,output){
+                                 urltable.insert([newEntry],function(err,insertedValue){
                                      if(err) throw err;
                                      else{
-                                         res.send(output.ops);
+                                         res.send(insertedValue.ops);
                                      }
-                                 })
+                                 });
                              }
                          });
                      }
@@ -48,8 +72,11 @@ app.get('/:miniurl*?',function(req,res){
                targetCollection.find({minified:applicationPath+req.params.miniurl}).toArray(function(err,results) {
                    if(err) throw err;
                    else{
-                       res.redirect(301,results[0].original);
-                       //res.redirect(301,results.original);
+                       if(results.length>0){
+                        res.redirect(301,results[0]["original"]);   
+                       }else{
+                           res.send("{error:'Bad Result. Try Again!'}");
+                       }
                    }
                });
            }
@@ -58,6 +85,8 @@ app.get('/:miniurl*?',function(req,res){
          res.send({error:"Invalid url! Please check again."});
     }
 });
+
+
 
 function generateRandomSalt(){
     return Math.floor(Math.random()*10000)+2;
